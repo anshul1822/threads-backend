@@ -3,7 +3,7 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import BodyParser  from 'body-parser';
 import cors from 'cors';
-
+import { prismaClient } from './lib/db';
 
 async function startServer(){
 
@@ -19,8 +19,26 @@ async function startServer(){
             type Query{
                 getPosts : [Posts]
             }
+
+            type Mutation {
+                createUser(firstName : String!, lastName : String!, email : String!, password : String!) : Boolean 
+            }
         `,
         resolvers : {
+            Mutation : {
+                createUser : async( _ , 
+                    {firstName, lastName, email, password} : 
+                    {firstName : string, lastName : string, email : string, password : string}) => {
+                        
+                        await prismaClient.user.create({
+                            data:{
+                                    firstName, lastName, email, password, salt : 'random_salt'
+                                }
+                        });
+
+                        return true;
+}
+            },
             Query : {
                 getPosts : () => { 
                     return [{
