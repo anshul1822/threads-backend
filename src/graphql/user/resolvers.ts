@@ -1,28 +1,28 @@
-import { prismaClient } from "../../lib/db";
+import UserService, { createUserPayload, loginUserPayload } from '../../services/user';
 
 export const query = {
-    getPosts : () => { 
-        return [{
-            id : 1,
-            name : 'Post 1'
-        }]
+
+    loginUser : async(_ : any, payload : loginUserPayload) => {
+        const res = await UserService.loginUser(payload);
+        return res;
+    },
+
+    getLoggedInUser : async(_ : any, payload : any, context : any) => {
+
+        if(context && context.user){
+            const res = await UserService.getUserById(context.user.id);
+            return res; 
+        }
+        throw new Error("User not logged in");
     }
 }
 
 export const mutation = 
 {
-createUser : async( _ : any , 
-    {firstName, lastName, email, password} : 
-    {firstName : string, lastName : string, email : string, password : string}) => {
-        
-        await prismaClient.user.create({
-            data:{
-                    firstName, lastName, email, password, salt : 'random_salt'
-                }
-        });
-
-        return true;
-}
+    createUser : async( _ : any , payload : createUserPayload) => {
+        const res = await UserService.createUser(payload);
+        return res.id;
+    }
 }
 
 

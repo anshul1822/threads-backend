@@ -5,6 +5,7 @@ import BodyParser  from 'body-parser';
 import cors from 'cors';
 import { prismaClient } from './lib/db';
 import { createGraphqlApolloServer } from './graphql';
+import UserService from './services/user';
 
 async function startServer(){
 
@@ -61,7 +62,19 @@ async function startServer(){
 
 
 
-    app.use('/graphql', expressMiddleware(apolloServer)); 
+    app.use('/graphql', expressMiddleware(apolloServer, {
+        //@ts-ignore
+        context : async({req}) => {
+            const token = req.headers['token'];
+            
+            try {
+                const user = UserService.decodeToken(token as string);
+                return {user}
+            } catch (error) {
+                return {};
+            }
+        }
+    })); 
    
     app.get('/', (req, res) => {
         res.json({ message: 'Server is up and running' })

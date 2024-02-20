@@ -5,12 +5,10 @@ export async function createGraphqlApolloServer(){
 
     const server = new ApolloServer({
         typeDefs: `
-            type Posts{
-                    id : ID!,
-                    name : String!
-            }
+            ${User.typeDefs}
+            
             type Query{
-                getPosts : [Posts]
+                ${User.query}
             }
 
             type Mutation {
